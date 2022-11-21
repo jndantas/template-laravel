@@ -1,0 +1,19 @@
+// Body
+$body-bg: #f8fafc;
+
+// Typography
+$font-family-sans-serif: 'Nunito', sans-serif;
+$font-size-base: 0.9rem;
+$line-height-base: 1.6;
+
+.nav-link.router-link-active{
+    box-shadow: 0 4px 8px #acb5f6;
+    background-color: #6777ef;
+    color: #fff !important;
+}
+
+.nav-link.router-link-active:hover{
+    box-shadow: 0 0 0 #acb5f6 !important;
+    background-color: #6777ef;
+    color: #6777ef !important;
+}

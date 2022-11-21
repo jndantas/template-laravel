@@ -1,0 +1,51 @@
+version: "3.7"
+services:
+
+    mysql:
+        image: mariadb:10
+        container_name: ${APP_NAME}-db
+        command: mysqld --innodb-flush-method=fsync
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${DB_DATABASE}
+            - MYSQL_USER=${DB_USERNAME}
+            - MYSQL_PASSWORD=${DB_PASSWORD}
+        volumes:
+            - ./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf
+            - ./docker/mysql/data:/var/lib/mysql
+
+    webserver:
+        build: docker/php-fpm/8.1
+        container_name: ${APP_NAME}-php
+        working_dir: /application
+        volumes:
+            - .:/application
+#            - ./vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64:/usr/bin/wkhtmltopdf
+            - ./docker/php-fpm/php-overrides.ini:/etc/php/8.1/fpm/conf.d/99-overrides.ini
+        links:
+            - mysql:${DB_HOST}
+
+    nginx:
+        image: nginx:alpine
+        container_name: ${APP_NAME}-http
+        working_dir: /application
+        volumes:
+            - .:/application
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - ./docker/nginx/fastcgi_params:/etc/nginx/fastcgi_params
+        ports:
+            - "9999:80"
+        links:
+            - webserver:${APP_NAME}-php
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: ${APP_NAME}-phpmyadmin
+        environment:
+            PMA_HOST: ${DB_HOST}
+            PMA_PORT: 3306
+            UPLOAD_LIMIT: 300M
+        ports:
+            - '9050:80'
+        volumes:
+            - /sessions
